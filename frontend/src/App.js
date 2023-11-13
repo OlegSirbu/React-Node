@@ -1,12 +1,11 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-
 import React, { useContext, useEffect } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Context } from "./context";
 import Navbar from "./components/Navbar";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Signup from "./pages/Signup";
 import Confirmation from "./pages/Confirmation";
 import Login from "./pages/Login";
-import { Context } from "./context";
+import Home from "./pages/Home";
 
 const RequireAuth = ({ children }) => {
   const { state } = useContext(Context);
@@ -18,30 +17,24 @@ const OnlyNotAuth = ({ children }) => {
   return !state.auth ? children : <Navigate to="/" replace />;
 };
 
-const Home = () => {
-  const { state } = useContext(Context);
-  return <h1>Hello, ${state.user?.username || state.user?.email}!</h1>;
-};
-
 const App = () => {
   localStorage.clear();
-  const { state, dispatch } = useContext(Context);
-  console.log("state :>> ", state);
+  const { dispatch } = useContext(Context);
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = JSON.parse(localStorage.getItem("educativeUser"));
     if (user)
       dispatch({
         type: "LOGIN",
         payload: {
           user: user,
-          token: user?.token || "",
+          token: user?.token,
         },
       });
   }, []);
   return (
     <>
-      <Navbar auth={state.auth} />
+      <Navbar auth={false} />
       <Routes>
         <Route
           path="/"
