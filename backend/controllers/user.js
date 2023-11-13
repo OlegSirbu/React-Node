@@ -44,10 +44,7 @@ const createTransporter = async () => {
 const sendEmail = async ({ email, username, res }) => {
   // Create a unique confirmation token
   const confirmationToken = encrypt(username);
-  const apiUrl =
-    process.env.API_URL ||
-    "https://ed-4920280845647872.educative.run" ||
-    "http://0.0.0.0:4000";
+  const apiUrl = process.env.API_URL || "http://0.0.0.0:3000";
 
   // Initialize the Nodemailer with your Gmail credentials
   const Transport = await createTransporter();
@@ -178,7 +175,7 @@ exports.login = async (req, res) => {
     if (user && (await bcrypt.compare(password, user.password))) {
       // Create token
       const email = user.email;
-      const token = jwt.sign(
+      const token = await jwt.sign(
         { user_id: user._id, email },
         process.env.TOKEN_SECRET_KEY,
         {
@@ -191,8 +188,9 @@ exports.login = async (req, res) => {
 
       // user
       res.status(200).json(user);
+    } else {
+      res.status(400).send("Invalid Credentials");
     }
-    res.status(400).send("Invalid Credentials");
   } catch (err) {
     console.error(err);
     return res.status(400).send(err.message);
