@@ -1,5 +1,4 @@
 const express = require("express");
-const auth = require("./middleware/auth.js");
 
 require("dotenv").config();
 require("./database/database.js").connect();
@@ -15,10 +14,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
 app.use("/uploads", express.static("./uploads"));
-
-app.post("/hello", auth, (req, res) => {
-  res.status(200).send("Hello :) ");
-});
 
 app.use("/api", router);
 

@@ -1,5 +1,8 @@
-const router = require("express").Router(); // Ge the router instance of Express
-const userController = require("../controllers/user"); // Get all exported functions in the user controller
+const router = require("express").Router();
+const userController = require("../controllers/user");
+const fileController = require("../controllers/file");
+const auth = require("../middleware/auth.js");
+const { upload } = require("../middleware/multer");
 
 // Map the `signup` request to the signup function
 router.post("/signup", userController.signup);
