@@ -3,6 +3,8 @@ const fs = require("fs");
 const readline = require("readline");
 const SpellChecker = require("simple-spellchecker").getDictionarySync("en-GB");
 const stringSimilarity = require("string-similarity");
+const sharp = require("sharp");
+
 const BASE_URL = "https://ed-4920280845647872.educative.run";
 
 const spellCheck = async (path) => {
@@ -40,6 +42,31 @@ const spellCheck = async (path) => {
   });
 };
 
+const processImage = async (path) => {
+  try {
+    const imgInstnace = sharp(path);
+
+    const newPath = path.split(".")[0] + "-img.jpeg";
+    imgInstnace
+      .resize({
+        width: 350,
+        fit: sharp.fit.contain,
+      })
+      .toFormat("jpeg", { mozjpeg: true })
+      .blur(1)
+      .composite([{ input: "uploads/logo.png", gravity: "center" }])
+      .toFile(newPath);
+
+    return newPath;
+  } catch (error) {
+    console.log(
+      `An error occurred during processing the uploaded image: ${error}`
+    );
+  }
+
+  return path;
+};
+
 exports.upload = async (req, res) => {
   try {
     const { error } = validate(req.body);
@@ -51,6 +78,10 @@ exports.upload = async (req, res) => {
     if (req.file.mimetype === "text/plain") {
       await spellCheck(req.file.path);
       path = `${req.file.path}.txt`;
+    }
+
+    if (req.file.mimetype.match(/^image/)) {
+      path = await processImage(req.file.path);
     }
 
     const file = await File.create({
