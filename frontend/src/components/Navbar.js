@@ -22,6 +22,12 @@ const Actions = ({ auth, customStyle, dispatch }) => {
         </button>
       ) : (
         <>
+          <Link to="/view" className={customStyle}>
+            List files
+          </Link>
+          <Link to="/upload" className={customStyle}>
+            Upload
+          </Link>
           <Link to="/login" className={customStyle}>
             Login
           </Link>
