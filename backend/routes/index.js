@@ -14,5 +14,6 @@ router.get("/file/:createdBy", auth, fileController.getAll);
 router.get("/file/:createdBy/:fileId", auth, fileController.getFile);
 router.get("/file", auth, fileController.searchFiles);
 router.put("/file/:_id", auth, fileController.updateFile);
+router.delete("/file/:_id", auth, fileController.deleteFile);
 
 module.exports = router;
