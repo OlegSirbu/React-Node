@@ -10,4 +10,8 @@ router.post("/login", userController.login);
 router.get("/verify/:confirmationToken", userController.verifyEmail);
 router.post("/upload", auth, upload.single("file"), fileController.upload);
 
+router.get("/file/:createdBy", auth, fileController.getAll);
+router.get("/file/:createdBy/:fileId", auth, fileController.getFile);
+router.get("/file", auth, fileController.searchFiles);
+
 module.exports = router;
