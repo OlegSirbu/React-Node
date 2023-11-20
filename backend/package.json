@@ -28,6 +28,7 @@
     "cors": "^2.8.5",
     "multer": "^1.4.5-lts.1",
     "sharp": "^0.32.6",
-    "simple-spellchecker": "^1.0.2"
+    "simple-spellchecker": "^1.0.2",
+    "string-similarity": "^4.0.4"
   }
 }

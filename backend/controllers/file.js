@@ -46,16 +46,23 @@ const processImage = async (path) => {
   try {
     const imgInstnace = sharp(path);
 
-    const newPath = path.split(".")[0] + "-img.jpeg";
-    imgInstnace
+    const newPath = "uploads/" + Date.now().toString() + ".jpg";
+
+    await imgInstnace
       .resize({
-        width: 350,
+        width: 500,
         fit: sharp.fit.contain,
       })
-      .toFormat("jpeg", { mozjpeg: true })
+      .jpeg({ quality: 80 })
       .blur(1)
-      .composite([{ input: "uploads/logo.png", gravity: "center" }])
-      .toFile(newPath);
+      .composite([
+        { input: "/app/backend/uploads/logo.png", gravity: "center" },
+      ])
+      .toFile(newPath, function (err) {
+        if (err) {
+          return path;
+        }
+      });
 
     return newPath;
   } catch (error) {
@@ -99,26 +106,21 @@ exports.upload = async (req, res) => {
   }
 };
 
-exports.getFile = async (req, res) => {
+exports.getAll = async (req, res) => {
   try {
-    const { createdBy, fileId } = req.params;
+    const createdBy = req.user.user_id;
 
-    const files = await File.findOne({ _id: fileId, createdBy: createdBy });
-
-    if (!files) {
-      return res.status(404).send("The requested file does not exist");
-    }
-
+    const allFiles = await File.find({ createdBy: createdBy });
     res
       .status(200)
-      .json({ message: "File retrieved successfully", data: file });
+      .json({ message: "Files retrieved successfully", data: allFiles });
   } catch (err) {
     console.log(err);
     return res.status(500).send(err.message);
   }
 };
 
-exports.getAll = async (req, res) => {
+exports.getFile = async (req, res) => {
   try {
     const { createdBy, fileId } = req.params;
 
@@ -164,7 +166,6 @@ exports.updateFile = async (req, res) => {
     if (!name || !description)
       return res.status(400).send("File's name and description are required");
 
-    const result = await File.validateAsync({ name, description });
     const file = await File.findOne({
       _id,
     });
@@ -173,12 +174,12 @@ exports.updateFile = async (req, res) => {
       return res.status(404).send("The requested file does not exist");
     }
 
-    const updatedFile = await File.update(
+    const updatedFile = await File.updateOne(
       {
         _id,
       },
       {
-        $set: result,
+        $set: { name, description },
       },
       { upsert: true }
     );
@@ -191,6 +192,7 @@ exports.updateFile = async (req, res) => {
     return res.status(500).send(err.message);
   }
 };
+
 exports.deleteFile = async (req, res) => {
   try {
     const { _id } = req.params;

@@ -24,9 +24,16 @@ const updateFile = (file) => {
   );
 };
 
+const deleteFile = (id) => {
+  return axios.delete(`${API_URL}/file/${id}`, {
+    headers: { ...authHeader() },
+  });
+};
+
 const UserService = {
   upload,
   getFiles,
+  deleteFile,
   updateFile,
 };
 
