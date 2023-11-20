@@ -99,6 +99,25 @@ exports.upload = async (req, res) => {
   }
 };
 
+exports.getFile = async (req, res) => {
+  try {
+    const { createdBy, fileId } = req.params;
+
+    const files = await File.findOne({ _id: fileId, createdBy: createdBy });
+
+    if (!files) {
+      return res.status(404).send("The requested file does not exist");
+    }
+
+    res
+      .status(200)
+      .json({ message: "File retrieved successfully", data: file });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send(err.message);
+  }
+};
+
 exports.getAll = async (req, res) => {
   try {
     const { createdBy, fileId } = req.params;
