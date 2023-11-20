@@ -6,6 +6,8 @@ import Signup from "./pages/Signup";
 import Confirmation from "./pages/Confirmation";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
+import View from "./pages/View";
+import Upload from "./pages/Upload";
 
 const RequireAuth = ({ children }) => {
   const { state } = useContext(Context);
@@ -18,11 +20,10 @@ const OnlyNotAuth = ({ children }) => {
 };
 
 const App = () => {
-  localStorage.clear();
   const { dispatch } = useContext(Context);
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("educativeUser"));
+    const user = JSON.parse(localStorage.getItem("user"));
     if (user)
       dispatch({
         type: "LOGIN",
@@ -32,6 +33,7 @@ const App = () => {
         },
       });
   }, []);
+
   return (
     <>
       <Navbar auth={false} />
@@ -44,6 +46,14 @@ const App = () => {
             </RequireAuth>
           }
         />
+        <Route
+          path="/view"
+          element={
+            <RequireAuth>
+              <View />
+            </RequireAuth>
+          }
+        />
 
         <Route
           path="/signup"
@@ -53,6 +63,15 @@ const App = () => {
             </OnlyNotAuth>
           }
         />
+        <Route
+          path="/upload"
+          element={
+            <RequireAuth>
+              <Upload />
+            </RequireAuth>
+          }
+        />
+
         <Route
           path="/login"
           element={
