@@ -1,6 +1,71 @@
 const { File, validate } = require("../models/file");
+const fs = require("fs");
+const readline = require("readline");
+const SpellChecker = require("simple-spellchecker").getDictionarySync("en-GB");
+const stringSimilarity = require("string-similarity");
+const sharp = require("sharp");
 
 const BASE_URL = "https://ed-4920280845647872.educative.run";
+
+const spellCheck = async (path) => {
+  const readInterface = readline.createInterface({
+    input: fs.createReadStream(path),
+    output: process.stdout,
+    console: false,
+  });
+
+  let text = "";
+
+  for await (const line of readInterface) {
+    const correctedLine = line
+      .split(" ")
+      .map((word) => {
+        if (!SpellChecker.spellCheck(word)) {
+          const suggestions = SpellChecker.getSuggestions(word);
+
+          const matches = stringSimilarity.findBestMatch(
+            word,
+            suggestions.length === 0 ? [word] : suggestions
+          );
+
+          return matches.bestMatch.target;
+        }
+        return word;
+      })
+      .join(" ");
+
+    text += correctedLine + "\n";
+  }
+
+  fs.writeFile(`${path}.txt`, text, (err, res) => {
+    if (err) console.log("error", err);
+  });
+};
+
+const processImage = async (path) => {
+  try {
+    const imgInstnace = sharp(path);
+
+    const newPath = path.split(".")[0] + "-img.jpeg";
+    imgInstnace
+      .resize({
+        width: 350,
+        fit: sharp.fit.contain,
+      })
+      .toFormat("jpeg", { mozjpeg: true })
+      .blur(1)
+      .composite([{ input: "uploads/logo.png", gravity: "center" }])
+      .toFile(newPath);
+
+    return newPath;
+  } catch (error) {
+    console.log(
+      `An error occurred during processing the uploaded image: ${error}`
+    );
+  }
+
+  return path;
+};
 
 exports.upload = async (req, res) => {
   try {
@@ -9,6 +74,15 @@ exports.upload = async (req, res) => {
 
     const { name, description } = req.body;
     let path = req.file.path;
+
+    if (req.file.mimetype === "text/plain") {
+      await spellCheck(req.file.path);
+      path = `${req.file.path}.txt`;
+    }
+
+    if (req.file.mimetype.match(/^image/)) {
+      path = await processImage(req.file.path);
+    }
 
     const file = await File.create({
       name,
